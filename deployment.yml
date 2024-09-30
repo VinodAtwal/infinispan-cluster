@@ -1,0 +1,38 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: infinispan-cluster
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: infinispan
+  template:
+    metadata:
+      labels:
+        app: infinispan
+    spec:
+      containers:
+        - args:
+            - -Djgroups.dns.query=infinispan-discovery-service.infinispan.svc.cluster.local
+          name: infinispan
+          image: infinispan
+          imagePullPolicy: Never
+          ports:
+            - containerPort: 11222
+              protocol: TCP # Default port for Infinispan
+            - containerPort: 8888
+              protocol: TCP
+          env:
+            - name: USER
+              value: "admin" # Change to a secure username
+            - name: PASS
+              value: "mypassword123" # Change to a secure password
+            - name: INFINISPAN_CLUSTER_NAME
+              value: "infinispan-cluster"
+            - name: INFINISPAN_CACHE_OWNERS
+              value: "2" # Number of owners for cache entries (replicas)
+            - name: JAVA_OPTS
+              value: "-Xms512m -Xmx512m" # Adjust memory settings
+            - name: IDENTITIES_BATCH
+              value: /opt/infinispan/server/conf/identity.batch

@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: infinispan-service
+  labels:
+    app: infinispan
+spec:
+  type: ClusterIP
+  selector:
+    app: infinispan
+  ports:
+    - protocol: TCP
+      port: 11222
+      targetPort: 11222

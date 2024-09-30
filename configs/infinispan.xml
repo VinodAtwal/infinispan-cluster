@@ -1,0 +1,132 @@
+<infinispan
+      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xsi:schemaLocation="urn:infinispan:config:14.0 https://infinispan.org/schemas/infinispan-config-14.0.xsd
+                            urn:infinispan:server:14.0 https://infinispan.org/schemas/infinispan-server-14.0.xsd"
+      xmlns="urn:infinispan:config:14.0"
+      xmlns:server="urn:infinispan:server:14.0">
+      
+   <cache-container name="remote-test" statistics="true">
+      <transport cluster="${infinispan.cluster.name:globalCluster}" node-name="${infinispan.node.name:}" site="globalSite" stack="kubernetes"/>
+      <security>
+         <authorization/>
+      </security>
+      
+      <!-- <serialization marshaller="org.infinispan.jboss.marshalling.commons.GenericJBossMarshaller">
+            <allow-list>
+                <class>org.keycloak.cluster.infinispan.WrapperClusterEvent</class>
+                <regex>.*</regex>
+            </allow-list>
+        </serialization>
+
+    <replicated-cache name="work">
+    	<encoding media-type="application/x-jboss-marshalling"/>
+       <security>
+         <authorization/>
+      </security>
+    </replicated-cache>
+    
+    
+    <distributed-cache name="sessions" owners="2">
+    	<encoding media-type="application/x-jboss-marshalling"/>
+       <security>
+         <authorization/>
+      </security>
+    </distributed-cache>
+    
+    <distributed-cache name="authenticationSessions" owners="2">
+    	<encoding media-type="application/x-jboss-marshalling"/>
+       <security>
+         <authorization/>
+      </security>
+    </distributed-cache>
+    
+    <distributed-cache name="clientSessions" owners="2">
+    	<encoding media-type="application/x-jboss-marshalling"/>
+       <security>
+         <authorization/>
+      </security>
+    </distributed-cache>
+    
+    <distributed-cache name="offlineSessions" owners="2">
+    	<encoding media-type="application/x-jboss-marshalling"/>
+       <security>
+         <authorization/>
+      </security>
+    </distributed-cache>
+    
+    <distributed-cache name="offlineClientSessions" owners="2">
+    	<encoding media-type="application/x-jboss-marshalling"/>
+       <security>
+         <authorization/>
+      </security>
+    </distributed-cache>
+    
+    <distributed-cache name="actionTokens" owners="2">
+    	<encoding media-type="application/x-jboss-marshalling"/>
+       <security>
+         <authorization/>
+      </security>
+    </distributed-cache>
+    
+    <distributed-cache name="loginFailures" owners="2">
+    	<encoding media-type="application/x-jboss-marshalling"/>
+       <security>
+         <authorization/>
+      </security>
+    </distributed-cache> -->
+   </cache-container>
+
+   <server xmlns="urn:infinispan:server:14.0">
+      <interfaces>
+         <interface name="public">
+            <inet-address value="${infinispan.bind.address:127.0.0.1}"/>
+         </interface>
+      </interfaces>
+
+      <socket-bindings default-interface="public" port-offset="${infinispan.socket.binding.port-offset:0}">
+         <socket-binding name="default" port="${infinispan.bind.port:11222}"/>
+         <socket-binding name="memcached" port="11221"/>
+      </socket-bindings>
+
+      <security>
+         <credential-stores>
+            <credential-store name="credentials" path="credentials.pfx">
+               <clear-text-credential clear-text="secret"/>
+            </credential-store>
+         </credential-stores>
+         <security-realms>
+            <security-realm name="default">
+               <!-- Uncomment to enable TLS on the realm -->
+               <!-- <server-identities>
+                  <ssl>
+                     <keystore path="server.p12"
+                      relative-to="infinispan.server.config.path"
+                      password="secret"
+                      alias="server"
+                      generate-self-signed-certificate-host="localhost"/>
+                  </ssl>
+               </server-identities> -->
+               <properties-realm groups-attribute="Roles">
+                  <user-properties path="users.properties"/>
+                  <group-properties path="groups.properties"/>
+               </properties-realm>
+            </security-realm>
+         </security-realms>
+      </security>
+
+   <endpoints>
+    <endpoint socket-binding="default" security-realm="default">
+      <hotrod-connector name="hotrod">
+         <authentication>
+            <sasl mechanisms="DIGEST-MD5 PLAIN"
+                  server-name="infinispan"
+                  qop="auth"/>
+         </authentication>
+      </hotrod-connector>
+      <rest-connector name="rest">
+         <authentication mechanisms="DIGEST BASIC"/>
+      </rest-connector>
+    </endpoint>
+  </endpoints>
+   </server>
+</infinispan>
